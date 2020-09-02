@@ -27,6 +27,15 @@ server.get("/api/posts", (req, res) => {
     ? res.status(200).json(posts).end()
     : res.status(500).json({ message: "Nah" });
 });
+
+server.post("/api/posts",validatePost,(req, res)=>{
+  const resource = postDb.insert(req.body)
+  resource ? res.status(200).json(resource).end() : res.status(500).json({message: 'Nope'})
+})
+
+server.post("/api/users", validateUser, (req, res)=>{
+  
+})
 //custom middleware
 
 function logger() {
