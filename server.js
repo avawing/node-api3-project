@@ -30,11 +30,17 @@ server.get("/api/posts", (req, res) => {
 
 server.post("/api/posts",validatePost,(req, res)=>{
   const resource = postDb.insert(req.body)
-  resource ? res.status(200).json(resource).end() : res.status(500).json({message: 'Nope'})
+  resource ? res.status(201).json(resource).end() : res.status(500).json({message: 'Nope'})
 })
 
 server.post("/api/users", validateUser, (req, res)=>{
-  
+  const resource = userDb.insert(req.body)
+  resource ? res.status(201).json(resource).end() : res.status(500).json({message: 'Nope'})
+})
+
+server.put("/api/users/:id", validateUserId, validateUser, (req, res)=>{
+  const object = userDb.update(req.id, req.body)
+  object ? status(200).json(object).end() : status(500).json({message: 'Nope'})
 })
 //custom middleware
 
