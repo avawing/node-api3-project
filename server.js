@@ -40,7 +40,12 @@ server.post("/api/users", validateUser, (req, res)=>{
 
 server.put("/api/users/:id", validateUserId, validateUser, (req, res)=>{
   const object = userDb.update(req.id, req.body)
-  object ? status(200).json(object).end() : status(500).json({message: 'Nope'})
+  object ? res.status(200).json(object).end() : res.status(500).json({message: 'Nope'})
+})
+
+server.delete("/api/users/:id", validateUserId, (req, res)=>{
+  const number = userDb.delete(req.id)
+  number === 1 ? res.status(204).json({message: 'Success'}) : res.status(500).json({message: 'You fail'})
 })
 //custom middleware
 
