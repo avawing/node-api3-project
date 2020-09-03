@@ -3,66 +3,88 @@ const userDb = require("./users/userDb");
 const postDb = require("./posts/postDb");
 const server = express();
 
-
 server.use(logger);
 server.use(express.json());
 server.get("/", (req, res) => {
-  res.send('Hi')
+  res.send("Hi");
 });
 
 server.get("/api/users", (req, res) => {
-userDb.get()
-  .then(users => users
-    ? res.status(200).json(users)
-    : res.status(500).json({ message: "Oops" }))
-  
+  userDb
+    .get()
+    .then((users) =>
+      users
+        ? res.status(200).json(users)
+        : res.status(500).json({ message: "Oops" })
+    );
 });
 
 server.get("/api/users/:id", validateUserId, (req, res) => {
-  res.status(200).json(req.users).end();
+  console.log(req.params.id)
+  res.status(200).json().end();
 });
 
 server.get("/api/posts", (req, res) => {
-  const posts = postDb.get();
-  posts
+  postDb.get().then(posts =>  posts
     ? res.status(200).json(posts).end()
-    : res.status(500).json({ message: "Nah" });
+    : res.status(500).json({ message: "Nah" }))
+     
 });
 
-server.post("/api/posts",validatePost,(req, res)=>{
-  const resource = postDb.insert(req.body)
-  resource ? res.status(201).json(resource).end() : res.status(500).json({message: 'Nope'})
+server.post("/api/posts", validatePost, (req, res) => {
+  postDb
+    .insert(req.body)
+    .then((resource) =>{resource
+      ? res.status(201).json(resource).end()
+      : res.status(500).json({ message: "Nope" })
+})
 })
 
-server.post("/api/users", validateUser, (req, res)=>{
-  const resource = userDb.insert(req.body)
-  resource ? res.status(201).json(resource).end() : res.status(500).json({message: 'Nope'})
-})
+server.post("/api/users", validateUser, (req, res) => {
+  userDb.insert(req.body)
+  .then(resource => {
+    resource
+    ? res.status(201).json(resource).end()
+    : res.status(500).json({ message: "Nope" })
+  })
+ ;
+});
 
-server.put("/api/users/:id", validateUserId, validateUser, (req, res)=>{
-  const object = userDb.update(req.id, req.body)
-  object ? res.status(200).json(object).end() : res.status(500).json({message: 'Nope'})
-})
+server.put("/api/users/:id", validateUserId, validateUser, (req, res) => {
+userDb.update(req.id, req.body).then(
+  object => {
+    object
+    ? res.status(200).json(object).end()
+    : res.status(500).json({ message: "Nope" })
+  }
+)
+  ;
+});
 
-server.delete("/api/users/:id", validateUserId, (req, res)=>{
-  const number = userDb.delete(req.id)
-  number === 1 ? res.status(204).json({message: 'Success'}) : res.status(500).json({message: 'You fail'})
-})
+server.delete("/api/users/:id", validateUserId, (req, res) => {
+userDb.remove(req.params.id).then(
+  number => {
+    number === 1
+    ? res.status(204).json({ message: "Success" })
+    : res.status(500).json({ message: "You fail" })
+  }
+)
+ ;
+});
 //custom middleware
 
 function logger(req, res, next) {
-    console.log(
-      `a ${req.method} request was made to ${req.url} at ${Date.now()}`
-    );
-    next();
-  };
+  console.log(
+    `a ${req.method} request was made to ${req.url} at ${Date.now()}`
+  );
+  next();
+}
 
-function validateUserId() {
-  return function (req, res, next) {
-    req.user = userDb
-      .getById(req.params.id)
-      .then(
-        req.user ? next() : res.status(404).json({ message: "Not found" }).end()
+function validateUserId(req, res, next) {
+    userDb.getById((req.params.id))
+    
+      .then((result) => 
+        {result ? next(req.user) : res.status(404).json({ message: "Not found" }).end()}
       )
       .catch((e) =>
         res
@@ -70,10 +92,8 @@ function validateUserId() {
           .json({ message: `${e}` })
           .end()
       );
-  };
 }
-function validateUser() {
-  return function (req, res, next) {
+function validateUser(req, res, next) {
     if (!req.body) {
       res.status(400).json({ message: "missing user data" }).end();
     }
@@ -82,10 +102,8 @@ function validateUser() {
     } else {
       next();
     }
-  };
 }
-function validatePost() {
-  return function (req, res, next) {
+function validatePost(req, res, next) {
     if (!req.body) {
       res.status(400).json({ message: "missing user data" }).end();
     }
@@ -94,7 +112,5 @@ function validatePost() {
     } else {
       next();
     }
-  };
-}
-
-server.listen(4000, ()=>console.log('Listening'))
+  }
+server.listen(4000, () => console.log("Listening"))
