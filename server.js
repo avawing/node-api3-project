@@ -3,18 +3,19 @@ const userDb = require("./users/userDb");
 const postDb = require("./posts/postDb");
 const server = express();
 
-server.use(express.json());
-server.use(logger());
 
+server.use(logger);
+server.use(express.json());
 server.get("/", (req, res) => {
-  res.send(`<h2>Let's write some middleware!</h2>`);
+  res.send('Hi')
 });
 
 server.get("/api/users", (req, res) => {
-  const users = userDb.get();
-  users
+userDb.get()
+  .then(users => users
     ? res.status(200).json(users)
-    : res.status(500).json({ message: "Oops" });
+    : res.status(500).json({ message: "Oops" }))
+  
 });
 
 server.get("/api/users/:id", validateUserId, (req, res) => {
@@ -49,14 +50,13 @@ server.delete("/api/users/:id", validateUserId, (req, res)=>{
 })
 //custom middleware
 
-function logger() {
-  return function (req, res, next) {
+function logger(req, res, next) {
     console.log(
       `a ${req.method} request was made to ${req.url} at ${Date.now()}`
     );
     next();
   };
-}
+
 function validateUserId() {
   return function (req, res, next) {
     req.user = userDb
@@ -97,4 +97,4 @@ function validatePost() {
   };
 }
 
-module.exports = server;
+server.listen(4000, ()=>console.log('Listening'))
