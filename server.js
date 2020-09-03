@@ -20,8 +20,13 @@ server.get("/api/users", (req, res) => {
 });
 
 server.get("/api/users/:id", validateUserId, (req, res) => {
-  console.log(req.params.id)
-  res.status(200).json().end();
+  userDb.getById(req.params.id)
+  .then(
+    user => user ? res.status(200).json(user).end() : res.status(500).json({message: "nope"})
+  )
+    
+
+
 });
 
 server.get("/api/posts", (req, res) => {
@@ -51,7 +56,7 @@ server.post("/api/users", validateUser, (req, res) => {
 });
 
 server.put("/api/users/:id", validateUserId, validateUser, (req, res) => {
-userDb.update(req.id, req.body).then(
+userDb.update(req.params.id, req.body).then(
   object => {
     object
     ? res.status(200).json(object).end()
